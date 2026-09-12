@@ -12,10 +12,19 @@ The package ships a `cordis.patch.yml` and declares itself a profile bundle thro
 `dsh.bundle.patch`, so `dsh plugin add` mounts it as a dependency **and** as a profile layer — no
 hand-written composition row needed.
 
-### From GitHub (available today)
+### Recommended: the Release tarball (one command, no build permission)
 
 ```bash
-# pinned to a tag: a later push cannot change what actually runs
+dsh plugin --profile <name> add \
+  https://github.com/dingguangyi0/dsh-plugin-migration-workbuddy/releases/download/v0.1.0/dsh-plugin-migration-workbuddy-0.1.0.tgz
+```
+
+The tarball already contains a built `lib/`: measured at **one command, ~3 seconds, exit 0**, with no
+`allowBuilds` involvement, and the URL pins the version.
+
+### From GitHub by tag (needs a build permission)
+
+```bash
 dsh plugin --profile <name> add github:dingguangyi0/dsh-plugin-migration-workbuddy#v0.1.0
 ```
 
@@ -46,15 +55,14 @@ outside any sandbox. Only allow packages whose source you trust, and pin a tag o
 dsh plugin --profile <name> add /absolute/path/to/dsh-plugin-migration-workbuddy
 ```
 
-### From a distribution artifact (no build permission needed)
+### Packing your own tarball / publishing to a registry
 
 ```bash
+pnpm pack     # produces dsh-plugin-migration-workbuddy-0.1.0.tgz (runs prepare, so it includes lib/)
+dsh plugin --profile <name> add ./dsh-plugin-migration-workbuddy-0.1.0.tgz
+
 # once published to a registry (flip package.json private to false and pick a license first)
 dsh plugin --profile <name> add dsh-plugin-migration-workbuddy
-
-# or hand out the tarball
-pnpm pack     # produces dsh-plugin-migration-workbuddy-0.1.0.tgz
-dsh plugin --profile <name> add ./dsh-plugin-migration-workbuddy-0.1.0.tgz
 ```
 
 Both forms build `lib/` at publish time, so users never need to grant a build permission.

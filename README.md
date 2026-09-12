@@ -10,10 +10,19 @@
 本包自带 `cordis.patch.yml`，并通过 `dsh.bundle.patch` 声明自己是 profile bundle：`dsh plugin add`
 会把它**同时**装成依赖和 profile 层，不需要手写组合行。
 
-### 从 GitHub 安装（当前可用）
+### 推荐：从 Release 的 tarball 安装（一条命令，无需构建授权）
 
 ```bash
-# 固定到 tag：之后的推送不会改变实际运行的内容
+dsh plugin --profile <name> add \
+  https://github.com/dingguangyi0/dsh-plugin-migration-workbuddy/releases/download/v0.1.0/dsh-plugin-migration-workbuddy-0.1.0.tgz
+```
+
+tgz 里已经是构建好的 `lib/`，装完即用：实测**一条命令、约 3 秒、退出码 0**，不需要任何
+`allowBuilds` 授权，版本也被 URL 锁死。
+
+### 从 GitHub 按 tag 安装（需要构建授权）
+
+```bash
 dsh plugin --profile <name> add github:dingguangyi0/dsh-plugin-migration-workbuddy#v0.1.0
 ```
 
@@ -44,18 +53,15 @@ allowBuilds:
 dsh plugin --profile <name> add /绝对路径/dsh-plugin-migration-workbuddy
 ```
 
-### 发行包安装（无需构建授权）
+### 自己打 tarball / 发布到 registry
 
 ```bash
+pnpm pack     # 产出 dsh-plugin-migration-workbuddy-0.1.0.tgz（会自动跑 prepare，含 lib/）
+dsh plugin --profile <name> add ./dsh-plugin-migration-workbuddy-0.1.0.tgz
+
 # 发布到 registry 之后（需先把 package.json 的 private 改为 false 并定许可证）
 dsh plugin --profile <name> add dsh-plugin-migration-workbuddy
-
-# 或直接分发 tarball
-pnpm pack     # 产出 dsh-plugin-migration-workbuddy-0.1.0.tgz
-dsh plugin --profile <name> add ./dsh-plugin-migration-workbuddy-0.1.0.tgz
 ```
-
-两种形态都在发布时就把 `lib/` 构建好，因此不需要用户给任何构建授权。
 
 ### 关闭
 
