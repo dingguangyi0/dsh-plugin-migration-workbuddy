@@ -68,7 +68,8 @@
     "build": "node scripts/clean.mjs && tsdown && tsc -p tsconfig.json && tsc -p tsconfig.client.json --emitDeclarationOnly",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.client.json --noEmit && tsc -p tsconfig.tests.json --noEmit",
     "test": "vitest run",
-    "check": "npm run build && npm run typecheck && npm run test"
+    "check": "npm run build && npm run typecheck && npm run test",
+    "prepare": "tsdown && tsc -p tsconfig.json && tsc -p tsconfig.client.json --emitDeclarationOnly"
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "4.0.2",

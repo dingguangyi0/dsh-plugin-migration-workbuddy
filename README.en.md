@@ -8,18 +8,52 @@ copies, moves, or modifies WorkBuddy data.
 
 ## Install
 
-```bash
-# once published to a registry
-dsh plugin add dsh-plugin-migration-workbuddy
-
-# from a local checkout (not published yet)
-dsh plugin add /absolute/path/to/dsh-plugin-migration-workbuddy
-```
-
 The package ships a `cordis.patch.yml` and declares itself a profile bundle through
 `dsh.bundle.patch`, so `dsh plugin add` mounts it as a dependency **and** as a profile layer — no
-hand-written composition row needed. To turn it off, override the row by id in your own
-`$DSH_HOME/profiles/<name>/cordis.patch.yml`:
+hand-written composition row needed.
+
+### From GitHub (available today)
+
+```bash
+# pinned to a tag: a later push cannot change what actually runs
+dsh plugin --profile <name> add github:dingguangyi0/dsh-plugin-migration-workbuddy#v0.1.0
+```
+
+A git install fetches **sources, not built artifacts**, so this package ships a `prepare` script that
+pnpm runs after install to build `lib/` from `src/`. pnpm ≥10 refuses to run it until it is
+allowlisted, so the first `add` fails and prints a package key — copy it into that profile's
+`pnpm-workspace.yaml` and retry:
+
+```yaml
+allowBuilds:
+  dsh-plugin-migration-workbuddy: true
+```
+
+That allowance is **permission to execute the package's code on your machine at install time**,
+outside any sandbox. Only allow packages whose source you trust, and pin a tag or commit.
+
+### From a local checkout
+
+```bash
+dsh plugin --profile <name> add /absolute/path/to/dsh-plugin-migration-workbuddy
+```
+
+### From a distribution artifact (no build permission needed)
+
+```bash
+# once published to a registry (flip package.json private to false and pick a license first)
+dsh plugin --profile <name> add dsh-plugin-migration-workbuddy
+
+# or hand out the tarball
+pnpm pack     # produces dsh-plugin-migration-workbuddy-0.1.0.tgz
+dsh plugin --profile <name> add ./dsh-plugin-migration-workbuddy-0.1.0.tgz
+```
+
+Both forms build `lib/` at publish time, so users never need to grant a build permission.
+
+### Turning it off
+
+Override the row by id in your own `$DSH_HOME/profiles/<name>/cordis.patch.yml`:
 
 ```yaml
 - id: migration-workbuddy
@@ -108,6 +142,10 @@ pnpm run check       # all three in sequence
 
 Artifacts land in `lib/`: `lib/index.js` for the Host half and `lib/client.js` for the Client half
 (self-registering into `window.__ModuleLoader__` under the package name).
+
+`prepare` is the install-time entry point (pnpm runs it after a git install). It is the same chain as
+`build` without the directory clean, uses only this package's own devDependencies, and assumes no
+monorepo context — which is what lets a git install build successfully.
 
 ## Notes
 

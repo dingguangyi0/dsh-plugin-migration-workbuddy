@@ -7,17 +7,50 @@
 
 ## 安装
 
-```bash
-# 发布到 registry 之后
-dsh plugin add dsh-plugin-migration-workbuddy
+本包自带 `cordis.patch.yml`，并通过 `dsh.bundle.patch` 声明自己是 profile bundle：`dsh plugin add`
+会把它**同时**装成依赖和 profile 层，不需要手写组合行。
 
-# 当前本地检出（未发布时）
-dsh plugin add /绝对路径/dsh-plugin-migration-workbuddy
+### 从 GitHub 安装（当前可用）
+
+```bash
+# 固定到 tag：之后的推送不会改变实际运行的内容
+dsh plugin --profile <name> add github:dingguangyi0/dsh-plugin-migration-workbuddy#v0.1.0
 ```
 
-本包自带 `cordis.patch.yml` 并通过 `dsh.bundle.patch` 声明自己是 profile bundle，
-所以 `dsh plugin add` 会把它**同时**装成依赖和 profile 层——不需要手写组合行。
-想临时关掉，在你自己的 `$DSH_HOME/profiles/<name>/cordis.patch.yml` 里按 id 覆盖即可：
+git 安装取的是**源码而不是构建产物**，所以本包提供 `prepare` 脚本，由 pnpm 在安装后自动从
+`src/` 构建出 `lib/`。pnpm ≥10 默认拒绝执行它，第一次 `add` 会失败并打印一个包键——把它写进
+该 profile 的 `pnpm-workspace.yaml` 再重试：
+
+```yaml
+allowBuilds:
+  dsh-plugin-migration-workbuddy: true
+```
+
+这条授权等于**允许该包在安装时在你机器上执行代码**（在任何沙箱之外）。只对你信任源码的包这么做，
+并固定到 tag 或 commit。
+
+### 从本地检出安装
+
+```bash
+dsh plugin --profile <name> add /绝对路径/dsh-plugin-migration-workbuddy
+```
+
+### 发行包安装（无需构建授权）
+
+```bash
+# 发布到 registry 之后（需先把 package.json 的 private 改为 false 并定许可证）
+dsh plugin --profile <name> add dsh-plugin-migration-workbuddy
+
+# 或直接分发 tarball
+pnpm pack     # 产出 dsh-plugin-migration-workbuddy-0.1.0.tgz
+dsh plugin --profile <name> add ./dsh-plugin-migration-workbuddy-0.1.0.tgz
+```
+
+两种形态都在发布时就把 `lib/` 构建好，因此不需要用户给任何构建授权。
+
+### 关闭
+
+在你自己的 `$DSH_HOME/profiles/<name>/cordis.patch.yml` 里按 id 覆盖即可：
 
 ```yaml
 - id: migration-workbuddy
@@ -93,6 +126,9 @@ pnpm run check       # 三者串跑
 
 产物在 `lib/`：Host 面 `lib/index.js`，Client 面 `lib/client.js`（`window.__ModuleLoader__`
 自注册，id = 包名）。
+
+`prepare` 是安装时入口（pnpm 在 git 安装后自动调用），内容与 `build` 同一条链、只是不先清目录；
+它只用本包自己的 devDependencies，不依赖任何 monorepo 上下文，因此从 git 装也能构建成功。
 
 ## 说明
 
