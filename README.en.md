@@ -20,14 +20,22 @@ dsh plugin --profile <name> add github:dingguangyi0/dsh-plugin-migration-workbud
 ```
 
 A git install fetches **sources, not built artifacts**, so this package ships a `prepare` script that
-pnpm runs after install to build `lib/` from `src/`. pnpm ≥10 refuses to run it until it is
-allowlisted, so the first `add` fails and prints a package key — copy it into that profile's
-`pnpm-workspace.yaml` and retry:
+pnpm runs after install to build `lib/` from `src/`. pnpm ≥10 refuses to run it: **the first `add`
+always fails** and prints a ready-to-copy allowlist key in the error. Put `allowBuilds:` plus that
+exact key into the profile's `pnpm-workspace.yaml` and re-run the same `add`:
 
 ```yaml
+# $DSH_HOME/profiles/<name>/pnpm-workspace.yaml
 allowBuilds:
-  dsh-plugin-migration-workbuddy: true
+  dsh-plugin-migration-workbuddy@https://codeload.github.com/dingguangyi0/dsh-plugin-migration-workbuddy/tar.gz/<commit-sha>: true
 ```
+
+Two things we measured, both easy to get wrong:
+
+- **Use the full key pnpm printed.** The bare package name
+  (`dsh-plugin-migration-workbuddy: true`) does **not** work — the same error comes back.
+- The key embeds the resolved tarball URL and commit SHA, so it pins the version as a side effect. If
+  a later attempt prints a different key (git resolution changed), use the newest one.
 
 That allowance is **permission to execute the package's code on your machine at install time**,
 outside any sandbox. Only allow packages whose source you trust, and pin a tag or commit.

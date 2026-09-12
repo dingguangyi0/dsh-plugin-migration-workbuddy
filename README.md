@@ -18,13 +18,22 @@ dsh plugin --profile <name> add github:dingguangyi0/dsh-plugin-migration-workbud
 ```
 
 git 安装取的是**源码而不是构建产物**，所以本包提供 `prepare` 脚本，由 pnpm 在安装后自动从
-`src/` 构建出 `lib/`。pnpm ≥10 默认拒绝执行它，第一次 `add` 会失败并打印一个包键——把它写进
-该 profile 的 `pnpm-workspace.yaml` 再重试：
+`src/` 构建出 `lib/`。pnpm ≥10 默认拒绝执行它：**第一次 `add` 必定失败**，并在错误里打印一条可
+直接复制的授权键。把 `allowBuilds:` 连同那条键写进该 profile 的 `pnpm-workspace.yaml`，再重跑
+同一条 `add`：
 
 ```yaml
+# $DSH_HOME/profiles/<name>/pnpm-workspace.yaml
 allowBuilds:
-  dsh-plugin-migration-workbuddy: true
+  dsh-plugin-migration-workbuddy@https://codeload.github.com/dingguangyi0/dsh-plugin-migration-workbuddy/tar.gz/<commit-sha>: true
 ```
+
+实测两点坑：
+
+- **必须用 pnpm 打印的那条完整键**。只写包名 `dsh-plugin-migration-workbuddy: true` **不生效**，
+  还会继续报同一个错。
+- 键里带解析出的 tarball 地址和 commit SHA，所以它顺带起了**版本锁定**的作用；如果哪次打印出来的键
+  跟上一次不同（git 解析方式变了），用最新那条。
 
 这条授权等于**允许该包在安装时在你机器上执行代码**（在任何沙箱之外）。只对你信任源码的包这么做，
 并固定到 tag 或 commit。
