@@ -1,0 +1,18 @@
+# dsh-plugin-migration-workbuddy bundle patch.
+#
+# This package is both a plugin and a one-row profile bundle: declaring
+# `dsh.bundle.patch` here is what makes `dsh plugin add
+# dsh-plugin-migration-workbuddy` mount it as a profile layer instead of
+# installing an inert library.
+#
+# The row goes in an `insert` group (append semantics). A profile's own
+# cordis.patch.yml may still override it by id — including `disabled: true` —
+# because user layers compose after bundle layers.
+
+- insert:
+    - id: migration-workbuddy
+      name: dsh-plugin-migration-workbuddy
+      # No config block on purpose: the plugin's ConfigSchema defaults
+      # (enabled: true, toolMode: narrative, no model remapping) are the
+      # intended production values. Set `config:` in a profile layer to change
+      # them.

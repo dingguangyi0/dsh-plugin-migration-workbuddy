@@ -1,0 +1,106 @@
+{
+  "name": "dsh-plugin-migration-workbuddy",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Migrate WorkBuddy sessions, memories, MCP drafts, and automations into DSH — preview first, confirm once, read-only on the source",
+  "license": "UNLICENSED",
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "types": "./lib/types/client/index.d.ts",
+      "default": "./lib/client.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "cordis.patch.yml",
+    "docs/**",
+    "lib/**",
+    "README.md",
+    "README.en.md"
+  ],
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-settings"
+      ],
+      "platform": "web"
+    },
+    "capabilities": [
+      {
+        "id": "migration-workbuddy.workbuddy-migration",
+        "name": "WorkBuddy migration",
+        "description": "Read-only probe and preview of WorkBuddy sessions/memories, imported into the current workspace after confirmation.",
+        "category": "workspace",
+        "exposure": "guided",
+        "entrypoints": [
+          {
+            "kind": "settings",
+            "id": "settings.section:migration-workbuddy",
+            "label": "Migration & backup"
+          },
+          {
+            "kind": "route",
+            "id": "/api/migration/workbuddy/probe"
+          }
+        ],
+        "tags": [
+          "migration",
+          "workspace"
+        ]
+      }
+    ]
+  },
+  "scripts": {
+    "build": "node scripts/clean.mjs && tsdown && tsc -p tsconfig.json && tsc -p tsconfig.client.json --emitDeclarationOnly",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.client.json --noEmit && tsc -p tsconfig.tests.json --noEmit",
+    "test": "vitest run",
+    "check": "npm run build && npm run typecheck && npm run test"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "4.0.2",
+    "@deepseek-ai/dsh-client-locale": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-client-ui-settings": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-client-ui-slots": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-host-webserver": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-llm": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-scope": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-session": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-session-persistence": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-workspace": "0.1.2-rc.1",
+    "@deepseek-ai/schemastery": "^3.18.1"
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "4.0.2",
+    "@deepseek-ai/dsh-client-locale": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-client-ui-renderer": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-client-ui-settings": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-client-ui-slots": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-host-webserver": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-llm": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-scope": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-session": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-session-persistence": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-workspace": "0.1.2-rc.1",
+    "@deepseek-ai/schemastery": "^3.18.1",
+    "@types/node": "^22.20.0",
+    "@types/react": "^18",
+    "react": "18.3.1",
+    "tsdown": "0.22.2",
+    "typescript": "6.0.3",
+    "vitest": "4.1.8"
+  }
+}
